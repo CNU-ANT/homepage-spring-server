@@ -61,6 +61,4 @@ dependencies {
 	implementation ("org.springframework:spring-context-support")
 	implementation ("com.sun.mail:javax.mail")
 	implementation ("com.github.ulisesbocchio:jasypt-spring-boot-starter:1.17")
-
-
 }

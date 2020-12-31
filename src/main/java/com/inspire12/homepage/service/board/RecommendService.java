@@ -1,15 +1,14 @@
 package com.inspire12.homepage.service.board;
 
-import com.inspire12.homepage.model.entity.Recommend;
-import com.inspire12.homepage.repository.RecommendRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.inspire12.homepage.domain.model.Recommend;
+import com.inspire12.homepage.domain.repository.RecommendRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class RecommendService {
-
-    @Autowired
-    RecommendRepository recommendRepository;
+    private final RecommendRepository recommendRepository;
 
     public boolean recommendToggleArticle(int id, String username) {
         if (recommendRepository.existsById(id)) {

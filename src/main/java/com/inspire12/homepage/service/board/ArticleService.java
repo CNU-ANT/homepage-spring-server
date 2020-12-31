@@ -1,23 +1,20 @@
 package com.inspire12.homepage.service.board;
 
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.inspire12.homepage.domain.model.*;
+import com.inspire12.homepage.message.ArticleResponse;
+import com.inspire12.homepage.message.CommentResponse;
+import com.inspire12.homepage.message.ArticleRequest;
+import com.inspire12.homepage.domain.repository.ArticleLikeRepository;
+import com.inspire12.homepage.domain.repository.ArticleRepository;
+import com.inspire12.homepage.domain.repository.CommentRepository;
+import com.inspire12.homepage.domain.repository.UserRepository;
 
-import com.inspire12.homepage.message.ArticleMsg;
-import com.inspire12.homepage.message.CommentMsg;
-import com.inspire12.homepage.model.entity.*;
-import com.inspire12.homepage.model.request.ArticleRequest;
-import com.inspire12.homepage.repository.ArticleLikeRepository;
-import com.inspire12.homepage.repository.ArticleRepository;
-import com.inspire12.homepage.repository.CommentRepository;
-import com.inspire12.homepage.repository.UserRepository;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -25,38 +22,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ArticleService {
+    private final ArticleRepository articleRepository;
+    private final UserRepository userRepository;
+    private final ArticleLikeRepository articleLikeRepository;
+    private final CommentRepository commentRepository;
 
-    @Autowired
-    private ArticleRepository articleRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    ArticleLikeRepository articleLikeRepository;
-
-    @Autowired
-    CommentRepository commentRepository;
-
-    public ArticleMsg showArticleMsgById(Long postId) {
-
+    public ArticleResponse showArticleMsgById(Long postId) {
         articleRepository.increaseHit(postId);
         return getArticleMsgById(postId);
     }
 
-
-    public ArticleMsg getArticleMsgById(Long postId) {
+    public ArticleResponse getArticleMsgById(Long postId) {
         Article article = articleRepository.findById(postId).get();
         Optional<ArticleLike> articleLike = articleLikeRepository.findById(new ArticleLikePk(postId, (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
         if(article.getIsDeleted()) {
-
         }
 
-         return ArticleMsg.create(article, articleLike.isPresent());
+         return ArticleResponse.create(article, articleLike.isPresent());
     }
 
-    public List<ArticleMsg> showArticleMsgsWithCount(int type, int pageNum, int articleCount) {
+    public List<ArticleResponse> showArticleMsgsWithCount(int type, int pageNum, int articleCount) {
         int start = (pageNum - 1) * articleCount;
         List<Article> articles;
         if (type == 0) {
@@ -79,7 +66,7 @@ public class ArticleService {
         return article;
     }
 
-    public List<ArticleMsg> showArticleMsgs(int size) {
+    public List<ArticleResponse> showArticleMsgs(int size) {
         List<Article> articles = articleRepository.selectArticles(PageRequest.of(0, size));
         return convertArticles(articles);
     }
@@ -91,7 +78,6 @@ public class ArticleService {
         articleRepository.save(article);
         return true;
     }
-
 
     @Transactional
     public boolean saveArticleReply(Long parentId, Article childArticle) {
@@ -120,41 +106,41 @@ public class ArticleService {
         return false;
     }
 
-    private List<ArticleMsg> convertArticles(List<Article> articles) {
-        List<ArticleMsg> articleMsgs = new ArrayList<>();
+    private List<ArticleResponse> convertArticles(List<Article> articles) {
+        List<ArticleResponse> articleResponses = new ArrayList<>();
         for (Article article : articles) {
             try {
-                articleMsgs.add(ArticleMsg.create(article));
+                articleResponses.add(ArticleResponse.create(article));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return articleMsgs;
+        return articleResponses;
     }
 
-    private List<ArticleMsg> convertArticlesToArticleMsgs(List<Article> articles) {
-        List<ArticleMsg> articleMsgs = new ArrayList<>();
+    private List<ArticleResponse> convertArticlesToArticleMsgs(List<Article> articles) {
+        List<ArticleResponse> articleResponses = new ArrayList<>();
         for (Article article : articles) {
             try {
                 User author = userRepository.findById(article.getUsername()).get();
                 List<Comment> comments = commentRepository.selectCommentByArticleOrder(article.getId());
-                articleMsgs.add(ArticleMsg.createWithComments(article, author, convertToMsg(comments)));
+                articleResponses.add(ArticleResponse.createWithComments(article, author, convertToMsg(comments)));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return articleMsgs;
+        return articleResponses;
     }
 
-    private List<CommentMsg> convertToMsg(List<Comment> comments) {
-        List<CommentMsg> commentMsgs = new ArrayList<>();
+    private List<CommentResponse> convertToMsg(List<Comment> comments) {
+        List<CommentResponse> commentResponses = new ArrayList<>();
         for (Comment comment : comments) {
             try {
-                commentMsgs.add(CommentMsg.createCommentMsg(comment, userRepository.getOne(comment.getUsername())));
+                commentResponses.add(CommentResponse.createCommentMsg(comment, userRepository.getOne(comment.getUsername())));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return commentMsgs;
+        return commentResponses;
     }
 }

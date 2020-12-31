@@ -1,6 +1,6 @@
 package com.inspire12.homepage.controller;
 
-import com.inspire12.homepage.model.request.SignupRequest;
+import com.inspire12.homepage.message.SignupRequest;
 import com.inspire12.homepage.service.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-    @Autowired
-    EmailService emailService;
 
     public interface MyFunctionalInterface {
         public void method(int x);
@@ -22,10 +20,10 @@ public class TestController {
         return SignupRequest.create();
     }
 
-    @PostMapping("/test")
-    public void sendEmail () {
-        emailService.getCertifyTokenByMail("ox4443@naver.com");
-    }
+//    @PostMapping("/test")
+//    public void sendEmail () {
+//        emailService.getCertifyTokenByMail("ox4443@naver.com");
+//    }
 }
 
 

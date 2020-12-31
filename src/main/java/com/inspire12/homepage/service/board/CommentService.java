@@ -1,10 +1,11 @@
 package com.inspire12.homepage.service.board;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inspire12.homepage.message.CommentMsg;
-import com.inspire12.homepage.model.entity.Comment;
-import com.inspire12.homepage.repository.CommentRepository;
-import com.inspire12.homepage.repository.UserRepository;
+import com.inspire12.homepage.message.CommentResponse;
+import com.inspire12.homepage.domain.model.Comment;
+import com.inspire12.homepage.domain.repository.CommentRepository;
+import com.inspire12.homepage.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
-    @Autowired
-    CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    UserRepository userRepository;
-
-    public List<CommentMsg> getComments(Long articleId) {
+    public List<CommentResponse> getComments(Long articleId) {
         List<Comment> comments = commentRepository.selectCommentByArticleOrder(articleId);
         return convertToCommentMsgs(comments);
     }
@@ -52,13 +51,12 @@ public class CommentService {
         }
     }
 
-    private List<CommentMsg> convertToCommentMsgs(List<Comment> comments) {
-        List<CommentMsg> commentMsgs = new ArrayList<>();
+    private List<CommentResponse> convertToCommentMsgs(List<Comment> comments) {
+        List<CommentResponse> commentResponses = new ArrayList<>();
         for (Comment comment : comments) {
-            CommentMsg commentMsg = CommentMsg.createCommentMsg(comment, userRepository.findById(comment.getUsername()).get());
-            commentMsgs.add(commentMsg);
+            CommentResponse commentResponse = CommentResponse.createCommentMsg(comment, userRepository.findById(comment.getUsername()).get());
+            commentResponses.add(commentResponse);
         }
-        return commentMsgs;
+        return commentResponses;
     }
-
 }

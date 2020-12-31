@@ -1,19 +1,19 @@
 package com.inspire12.homepage.controller.security;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inspire12.homepage.interceptor.UserLevel;
-import com.inspire12.homepage.model.entity.User;
-import com.inspire12.homepage.model.request.EmailRequest;
-import com.inspire12.homepage.model.request.SignupRequest;
+import com.inspire12.homepage.interceptor.MethodAllowLevel;
+import com.inspire12.homepage.domain.model.User;
+import com.inspire12.homepage.message.DefaultResponse;
+import com.inspire12.homepage.message.EmailRequest;
+import com.inspire12.homepage.message.SignupRequest;
 import com.inspire12.homepage.security.AuthProvider;
 import com.inspire12.homepage.security.UserDetailService;
 
 import com.inspire12.homepage.service.EmailService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -36,86 +36,65 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
+@RequiredArgsConstructor
 public class SecurityController implements ErrorController {
-    @Autowired
-    AuthProvider authProvider;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    UserDetailService userDetailService;
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    RedisTemplate<String, String> redisTemplate;
+    private final AuthProvider authProvider;
+    private final UserDetailService userDetailService;
+    private final EmailService emailService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @PostMapping(value = "/valid-email")
     @ResponseBody
     public ResponseEntity<String> registerUser(@Valid @RequestBody final EmailRequest requestBody, RedirectAttributes redirectAttributes) throws InvalidKeyException, NoSuchAlgorithmException {
         String email = requestBody.getEmail();
         String token = emailService.getCertifyTokenByMail(email);
-
         redisTemplate.opsForValue().set(email, token);
-
         return ResponseEntity.ok().body(token);
     }
 
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<ObjectNode> registerUser(@Valid @RequestBody final SignupRequest requestBody, RedirectAttributes redirectAttributes) throws InvalidKeyException, NoSuchAlgorithmException {
+    public ResponseEntity<DefaultResponse> registerUser(@Valid @RequestBody final SignupRequest requestBody, RedirectAttributes redirectAttributes) throws InvalidKeyException, NoSuchAlgorithmException {
         String username = requestBody.getUsername();
         String password = requestBody.getPassword();
         String email = requestBody.getEmail();
         Integer studentId = Integer.parseInt(requestBody.getStudentId());
         String realName = requestBody.getRealName();
 
-        ObjectNode response = objectMapper.createObjectNode();
 
-        if (redisTemplate.opsForValue().get(email).equals(requestBody.getEmailToken()) == false){
-            response.put("name", "siginup");
-            response.put("status", "fail");
-            response.put("status_detail", "email_valid");
+        if (Objects.equals(redisTemplate.opsForValue().get(email), requestBody.getEmailToken()) == false){
+            DefaultResponse response = new DefaultResponse("signup", "fail", "email_valid");
             return ResponseEntity.badRequest().body(response);
         }
 
         String encryptedPassword = authProvider.encrypt(username, password);
         User user = User.create(username, email, encryptedPassword, studentId, realName);
 
-        try {
-            // 중복 체크 추가
-            if (userDetailService.isExistUser(user)) {
-                response.put("name", "signup");
-                response.put("status", "fail");
-                response.put("status_detail", "duplicated_id");
-                return ResponseEntity.unprocessableEntity().body(response);
-            }
-            userDetailService.saveUser(user);
-            response.put("name", "index");
-            response.put("status", "signup");
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            response.put("status", "fail");
+        // 중복 체크 추가
+        if (userDetailService.isExistUser(user)) {
+            DefaultResponse response = new DefaultResponse("signup", "fail", "duplicated_id");
+            return ResponseEntity.unprocessableEntity().body(response);
         }
-        response.put("name", "signup");
-        return ResponseEntity.unprocessableEntity().body(response);
+        userDetailService.saveUser(user);
+        DefaultResponse response = new DefaultResponse("index", "signup", null);
+
+        return ResponseEntity.ok().body(response);
     }
 
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Model model) {
         return "auth/login";
     }
 
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @RequestMapping(value = "/login", method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -163,21 +142,20 @@ public class SecurityController implements ErrorController {
         return ResponseEntity.ok().build();
     }
 //
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @RequestMapping(value = "/oauth", method = RequestMethod.POST)
-    public ResponseEntity<ObjectNode> loginFromKakao() {
-        ObjectNode response = objectMapper.createObjectNode();
-        return ResponseEntity.ok().body(response);
+    public ResponseEntity<DefaultResponse> loginFromKakao() {
+        return ResponseEntity.ok().body(new DefaultResponse(null, null, null));
     }
 //
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
-    @RequestMapping(value = "/oauth", method = RequestMethod.GET)
-    public ResponseEntity<ObjectNode> loginFromKakao2() {
-        ObjectNode response = objectMapper.createObjectNode();
-        return ResponseEntity.ok().body(response);
-    }
+//    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
+//    @RequestMapping(value = "/oauth", method = RequestMethod.GET)
+//    public ResponseEntity<DefaultResponse> loginFromKakao2() {
+//
+//        return ResponseEntity.ok().body(response);
+//    }
 
-    @UserLevel(allow = UserLevel.UserRole.GUEST)
+    @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request, Model model) {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
@@ -202,7 +180,6 @@ public class SecurityController implements ErrorController {
 
     @Override
     public String getErrorPath() {
-
         return "auth/error";
     }
 }

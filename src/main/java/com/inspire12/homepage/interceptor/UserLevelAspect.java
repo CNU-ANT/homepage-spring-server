@@ -12,10 +12,10 @@ import java.lang.reflect.Method;
 @Component
 public class UserLevelAspect {
 
-    @Around("@annotation(com.inspire12.homepage.interceptor.UserLevel)")
+    @Around("@annotation(com.inspire12.homepage.interceptor.MethodAllowLevel)")
     public Object allow(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature)joinPoint.getSignature()).getMethod();
-        UserLevel userLevel = method.getAnnotation(UserLevel.class);
+        MethodAllowLevel methodAllowLevel = method.getAnnotation(MethodAllowLevel.class);
         return joinPoint.proceed();
     }
 }
