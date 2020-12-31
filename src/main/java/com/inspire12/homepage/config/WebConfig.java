@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Value("${env.dev:}")
     String env;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SecurityInterceptor(env)).addPathPatterns("/**")
@@ -28,7 +29,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
         registry.addResourceHandler(
                 "/**",
                 "/img/**",
@@ -41,7 +41,5 @@ public class WebConfig implements WebMvcConfigurer {
                         "classpath:/static/js/");
 
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/resources/");
-
-
     }
 }

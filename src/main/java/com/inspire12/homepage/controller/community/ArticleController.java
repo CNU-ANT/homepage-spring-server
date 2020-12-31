@@ -2,12 +2,13 @@ package com.inspire12.homepage.controller.community;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inspire12.homepage.message.ArticleMsg;
-import com.inspire12.homepage.model.entity.Article;
-import com.inspire12.homepage.model.request.ArticleRequest;
+import com.inspire12.homepage.message.ArticleResponse;
+import com.inspire12.homepage.domain.model.Article;
+import com.inspire12.homepage.message.ArticleRequest;
 import com.inspire12.homepage.service.board.ArticleService;
 import com.inspire12.homepage.service.board.FileMetaService;
 import com.inspire12.homepage.service.user.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
@@ -17,24 +18,19 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequiredArgsConstructor
 public class ArticleController {
-
-    @Autowired
-    ArticleService articleService;
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    FileMetaService fileMetaService;
+    private final ArticleService articleService;
+    private final UserService userService;
+    private final FileMetaService fileMetaService;
 
     @GetMapping("/boards")
-    public List<ArticleMsg> showArticle(@RequestParam(value = "size", required = true) int size) {
+    public List<ArticleResponse> showArticle(@RequestParam(value = "size", required = true) int size) {
         return articleService.showArticleMsgs(size);
     }
 
     @GetMapping("/articles/{id}")
-    public ArticleMsg showArticleList(@PathVariable Long id) {
+    public ArticleResponse showArticleList(@PathVariable Long id) {
 
         return articleService.getArticleMsgById(id);
     }

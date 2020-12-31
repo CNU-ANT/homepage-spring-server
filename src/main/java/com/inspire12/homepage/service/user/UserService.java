@@ -1,11 +1,9 @@
 package com.inspire12.homepage.service.user;
 
-import com.inspire12.homepage.model.entity.Article;
-import com.inspire12.homepage.model.entity.User;
-import com.inspire12.homepage.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.inspire12.homepage.domain.model.User;
+import com.inspire12.homepage.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,12 +12,10 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class UserService {
-
-    @Autowired
-    UserRepository userRepository;
-
-    Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final UserRepository userRepository;
 
     public List<User> getAdminUsers() {
         List<User> users = new ArrayList<>();
@@ -28,7 +24,7 @@ public class UserService {
             try {
                 users.add(userRepository.findById(name).get());
             } catch (Exception e) {
-                logger.warn("user not found: " + name + e.toString());
+                log.warn("user not found: " + name + e.toString());
             }
         }
         Collections.shuffle(users);

@@ -1,7 +1,7 @@
 package com.inspire12.homepage.security;
 
-import com.inspire12.homepage.model.entity.User;
-import com.inspire12.homepage.repository.UserRepository;
+import com.inspire12.homepage.domain.model.User;
+import com.inspire12.homepage.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

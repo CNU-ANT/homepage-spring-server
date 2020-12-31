@@ -2,7 +2,6 @@ package com.inspire12.homepage.storage;
 
 import com.inspire12.homepage.exception.StorageException;
 import com.inspire12.homepage.exception.StorageFileNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -22,13 +21,7 @@ import java.util.stream.Stream;
 @Service
 public class FileSystemStorageService {
 
-    private final Path rootLocation;
-
-    @Autowired
-    public FileSystemStorageService(StorageProperties properties) {
-        this.rootLocation = Paths.get(properties.getLocation());
-    }
-
+    private Path rootLocation;
 
     public String store(MultipartFile file) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
