@@ -1,10 +1,9 @@
 package com.inspire12.homepage;
 
 import com.inspire12.homepage.exception.ErrorCode;
-import com.inspire12.homepage.exception.ResponseMessage;
 import com.inspire12.homepage.exception.NotAuthException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.inspire12.homepage.exception.ResponseMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,13 +19,13 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.time.LocalDateTime;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-    Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(Exception.class)
     public String handleNull(Model model, Exception e) {
         System.err.println(e.getClass());
-        logger.error("["+e.getClass() + "] " + e.getMessage() + " from user:"+ SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        log.error("["+e.getClass() + "] " + e.getMessage() + " from user:"+ SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         model.addAttribute("code", 500);
         model.addAttribute("msg", "에러가 발생했니다.");
         model.addAttribute("timestamp", LocalDateTime.now());
@@ -35,7 +34,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotAuthException.class)
     public String handleNotFound(Model model, Exception e) {
-        logger.error("["+e.getClass() + "] " + e.getMessage() + " from user:"+ SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        log.error("["+e.getClass() + "] " + e.getMessage() + " from user:"+ SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         model.addAttribute("code", 401);
         model.addAttribute("msg", "에러가 발생했습니다.");
         model.addAttribute("timestamp", LocalDateTime.now());
@@ -49,7 +48,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected String handleMethodArgumentNotValidException(Model model, MethodArgumentNotValidException e) {
-        logger.error("handleMethodArgumentNotValidException", e);
+        log.error("handleMethodArgumentNotValidException", e);
         final ResponseMessage response = ResponseMessage.of(ErrorCode.INVALID_INPUT_VALUE, e.getBindingResult());
         model.addAttribute("response", new ResponseEntity<>(response, HttpStatus.BAD_REQUEST));
         return "auth/error";
@@ -61,7 +60,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     protected String handleBindException(Model model, BindException e) {
-        logger.error("handleBindException", e);
+        log.error("handleBindException", e);
         final ResponseMessage response = ResponseMessage.of(ErrorCode.INVALID_INPUT_VALUE, e.getBindingResult());
         model.addAttribute("response", new ResponseEntity<>(response, HttpStatus.BAD_REQUEST));
         return "auth/error";
@@ -73,7 +72,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected String handleMethodArgumentTypeMismatchException(Model model, MethodArgumentTypeMismatchException e) {
-        logger.error("handleMethodArgumentTypeMismatchException", e);
+        log.error("handleMethodArgumentTypeMismatchException", e);
         final ResponseMessage response = ResponseMessage.of(ErrorCode.INVALID_INPUT_VALUE);
         model.addAttribute("response", new ResponseEntity<>(response, HttpStatus.BAD_REQUEST));
         return "auth/error";
@@ -84,7 +83,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     protected String handleHttpRequestMethodNotSupportedException(Model model, HttpRequestMethodNotSupportedException e) {
-        logger.error("handleHttpRequestMethodNotSupportedException", e);
+        log.error("handleHttpRequestMethodNotSupportedException", e);
         final ResponseMessage response = ResponseMessage.of(ErrorCode.METHOD_NOT_ALLOWED);
 
         model.addAttribute("response", new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED));
@@ -96,7 +95,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     protected String handleAccessDeniedException(Model model, AccessDeniedException e) {
-        logger.error("handleAccessDeniedException", e);
+        log.error("handleAccessDeniedException", e);
         final ResponseMessage response = ResponseMessage.of(ErrorCode.HANDLE_ACCESS_DENIED);
         model.addAttribute("response", new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE));
         return "auth/error";

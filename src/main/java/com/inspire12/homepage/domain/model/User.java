@@ -50,10 +50,10 @@ public class User implements UserDetails {
     @JsonProperty("created_at")
     LocalDateTime createdAt;
 
-    @Column(name="last_logined_at")
+    @Column(name="last_accessed")
     @UpdateTimestamp
-    @JsonProperty("last_logined_at")
-    LocalDateTime lastLoginedAt;
+    @JsonProperty("last_accessed")
+    LocalDateTime lastAccess;
 
     @Column(name="role")
     String role;
@@ -63,10 +63,6 @@ public class User implements UserDetails {
 
     @Column(name = "student_id")
     Integer studentId;
-
-//    List<String> role;
-
-
 
     public static User create(String username, String email, String password) {
         User user = new User();
@@ -109,6 +105,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return false;
     }
-
 
 }
