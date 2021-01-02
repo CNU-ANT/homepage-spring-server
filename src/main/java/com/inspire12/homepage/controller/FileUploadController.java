@@ -5,7 +5,7 @@ import com.inspire12.homepage.domain.model.FileMeta;
 import com.inspire12.homepage.message.UploadFileResponse;
 import com.inspire12.homepage.service.board.FileMetaService;
 import com.inspire12.homepage.exception.StorageFileNotFoundException;
-import com.inspire12.homepage.storage.FileSystemStorageService;
+import com.inspire12.homepage.service.storage.FileSystemStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
