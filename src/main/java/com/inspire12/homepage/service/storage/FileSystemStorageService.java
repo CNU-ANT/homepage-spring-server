@@ -1,4 +1,4 @@
-package com.inspire12.homepage.storage;
+package com.inspire12.homepage.service.storage;
 
 import com.inspire12.homepage.exception.StorageException;
 import com.inspire12.homepage.exception.StorageFileNotFoundException;
@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
