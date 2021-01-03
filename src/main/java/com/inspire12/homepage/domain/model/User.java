@@ -22,9 +22,11 @@ import java.util.Collection;
 public class User implements UserDetails {
 
     private static final long serialVersionUID = 1L;
-
     @Id
-    @Column(name="username")
+    @Column(name="id")
+    String id;
+
+    @Column(name="username", unique=true, nullable=false)
     String username;
 
     @Column(name = "email")

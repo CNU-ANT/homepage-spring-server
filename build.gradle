@@ -1,14 +1,17 @@
 buildscript {
-	ext {
-		springBootVersion = '2.1.6.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath('se.transmode.gradle:gradle-docker:1.2')
-	}
+    ext {
+        springBootVersion = '2.1.6.RELEASE'
+        querydslPluginVersion = '1.0.10'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("se.transmode.gradle:gradle-docker:1.2")
+        classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:${querydslPluginVersion}")
+    }
 }
 
 
@@ -23,64 +26,118 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 task print() {
-	doLast {
-		print "github push complete"
-	}
+    doLast {
+        print "github push complete"
+    }
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 ext {
-	springCloudVersion = 'Finchley.RELEASE'
+    springCloudVersion = 'Finchley.RELEASE'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'mysql:mysql-connector-java'
-	implementation('org.springframework.boot:spring-boot-starter-web')
-	implementation('org.springframework.boot:spring-boot-starter-thymeleaf:2.1.2.RELEASE')
+    // web
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-thymeleaf:2.1.2.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity5')
+    implementation 'org.projectlombok:lombok:1.18.4'
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude module: 'junit'
-	}
-	testImplementation('org.junit.jupiter:junit-jupiter-api:5.2.0')
-	testCompile('org.junit.jupiter:junit-jupiter-params:5.2.0')
-	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
+    //test
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude module: 'junit'
+    }
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.2.0')
+    testCompile('org.junit.jupiter:junit-jupiter-params:5.2.0')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
 
-	implementation('org.springframework.boot:spring-boot-starter-security')
-	implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity5')
-	implementation 'org.projectlombok:lombok:1.18.4'
-	implementation 'io.springfox:springfox-swagger2:2.9.2'
-	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
-	implementation ('org.springframework.boot:spring-boot-starter-data-redis')
-	// mail server
-	implementation("org.springframework.boot:spring-boot-starter-mail")
-	implementation ("org.springframework:spring-context-support")
-	implementation ("com.sun.mail:javax.mail")
-	implementation ("com.github.ulisesbocchio:jasypt-spring-boot-starter:1.17")
+    // db
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java'
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'com.querydsl:querydsl-apt'
+    implementation('org.springframework.boot:spring-boot-starter-data-redis')
 
-	// cloud
-	implementation ("org.springframework.cloud:spring-cloud-starter")
-	implementation ("org.springframework.cloud:spring-cloud-starter-openfeign")
+    // mail server
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework:spring-context-support")
+    implementation("com.sun.mail:javax.mail")
+    implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:1.17")
 
-	// tracer
-	implementation ('org.springframework.cloud:spring-cloud-starter-zipkin')
-	// elk
-	implementation ('net.logstash.logback:logstash-logback-encoder:6.3')
+    // cloud
+    implementation("org.springframework.cloud:spring-cloud-starter")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
-	// batch
-	implementation 'org.springframework.boot:spring-boot-starter-batch'
+    // tracer
+    implementation('org.springframework.cloud:spring-cloud-starter-zipkin')
+    // elk
+    implementation('net.logstash.logback:logstash-logback-encoder:6.3')
+
+    // batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 }
+
+
+// querydsl 적용
+//apply plugin: "com.ewerk.gradle.plugins.querydsl" // Plugin 적용
+//def querydslSrcDir = 'src/main/generated' // QClass 생성 위치
+//
+//querydsl {
+//    library = "com.querydsl:querydsl-apt"
+//    jpa = true
+//    querydslSourcesDir = querydslSrcDir
+//}
+//
+//compileQuerydsl {
+//    options.annotationProcessorPath = configurations.querydsl
+//}
+//
+//def generatedJavaSrcDir = 'src/main/generated'
+//def queryDslOutput = file(generatedJavaSrcDir)
+//
+//sourceSets {
+//    main {
+//        java {
+//            srcDirs = ['src/main/java', querydslSrcDir]
+//        }
+//    }
+//}
+//
+//
+//task generateQueryDSL(type: JavaCompile, group: 'build') {
+//    doFirst {
+//        delete queryDslOutput
+//        queryDslOutput.mkdirs()
+//    }
+//    source = sourceSets.main.java
+//    classpath = configurations.compile
+//    destinationDir = queryDslOutput
+//    options.compilerArgs = [
+//            '-proc:only',
+//            '-processor',
+//            'com.querydsl.apt.jpa.JPAAnnotationProcessor' // 여기에 각 라이브러리에서 제공하는 annotation processor 를 선언해야함
+//    ]
+//}
+//compileJava.dependsOn(generateQueryDSL)
+//
+///** clean 태스크 실행시 QClass 삭제 */
+//clean {
+//    delete queryDslOutput
+//}

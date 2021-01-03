@@ -1,19 +1,15 @@
 package com.inspire12.homepage.controller.security;
 
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inspire12.homepage.interceptor.MethodAllowLevel;
 import com.inspire12.homepage.domain.model.User;
+import com.inspire12.homepage.interceptor.MethodAllowLevel;
 import com.inspire12.homepage.message.DefaultResponse;
 import com.inspire12.homepage.message.EmailRequest;
 import com.inspire12.homepage.message.SignupRequest;
 import com.inspire12.homepage.security.AuthProvider;
 import com.inspire12.homepage.security.UserDetailService;
-
 import com.inspire12.homepage.service.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -45,8 +41,6 @@ public class SecurityController implements ErrorController {
     private final UserDetailService userDetailService;
     private final EmailService emailService;
     private final RedisTemplate<String, String> redisTemplate;
-
-    Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     @MethodAllowLevel(allow = MethodAllowLevel.UserRole.GUEST)
     @PostMapping(value = "/valid-email")

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,15 +17,18 @@ public class UserService {
     private final UserRepository userRepository;
 
     public List<User> getAdminUsers() {
-        List<User> users = new ArrayList<>();
+
         List<String> names = Arrays.asList("inspire12", "hygoni", "Sinyoung3016", "MoonDD99", "wilook");
-        for (String name : names) {
-            try {
-                users.add(userRepository.findById(name).get());
-            } catch (Exception e) {
-                log.warn("user not found: " + name + e.toString());
-            }
-        }
+        List<User> users = userRepository.findAllByUsernameIn(names);
+        //        for (String name : names) {
+//            try {
+//                users.add(userRepository.findById(name).orElseThrow(() -> {
+//                    throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+//                }));
+//            } catch (Exception e) {
+//                log.warn("user not found: " + name + e.toString());
+//            }
+//        }
         Collections.shuffle(users);
         return users;
     }
